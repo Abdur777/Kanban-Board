@@ -22,9 +22,10 @@ function App() {
   ];
 
   const [groupValue, setgroupValue] = useState(
-    getStateFromLocalStorage() || "status"
+    getStateFromLocalStorage("status") || "status"
   );
-  const [orderValue, setorderValue] = useState("title");
+  const [orderValue, setorderValue] = useState(
+    getStateFromLocalStorage("order") || "title");
   const [ticketDetails, setticketDetails] = useState([]);
 
   const orderDataByValue = useCallback(
@@ -51,19 +52,24 @@ function App() {
   );
 
   function saveStateToLocalStorage(state) {
-    localStorage.setItem("groupValue", JSON.stringify(state));
+    localStorage.setItem("groupValue", JSON.stringify(state.groupValue));
+    localStorage.setItem("orderValue",JSON.stringify(state.orderValue));
   }
 
-  function getStateFromLocalStorage() {
+  function getStateFromLocalStorage(val) {
     const storedState = localStorage.getItem("groupValue");
-    if (storedState) {
+    const storedOrder = localStorage.getItem("orderValue");
+    if (val==="status") {
       return JSON.parse(storedState);
+    }
+    else if(val==="order"){
+      return JSON.parse(storedOrder);
     }
     return null;
   }
 
   useEffect(() => {
-    saveStateToLocalStorage(groupValue);
+    saveStateToLocalStorage({groupValue,orderValue});
 
     async function fetchData() {
       try {
@@ -96,7 +102,7 @@ function App() {
     }
 
     fetchData();
-  }, [orderDataByValue, groupValue]);
+  }, [orderDataByValue, groupValue, orderValue]);
 
   function handleGroupValue(value) {
     setgroupValue(value);
