@@ -69,30 +69,33 @@ function App() {
   }
 
   useEffect(() => {
-    saveStateToLocalStorage({groupValue,orderValue});
+    saveStateToLocalStorage({ groupValue, orderValue });
     async function fetchData() {
-      const response = await axios.get('https://api.quicksell.co/v1/internal/frontend-assignment');
+      const response = await axios.get(
+        "https://api.quicksell.co/v1/internal/frontend-assignment"
+      );
       await refactorData(response);
-  
     }
     fetchData();
-    async function refactorData(response){
-      let ticketArray = []
-        if(response.status  === 200){
-          for(let i=0; i<response.data.tickets.length; i++){
-            for(let j=0; j<response.data.users.length; j++){
-              if(response.data.tickets[i].userId === response.data.users[j].id){
-                let ticketJson = {...response.data.tickets[i], userObj: response.data.users[j]}
-                ticketArray.push(ticketJson)
-              }
+    async function refactorData(response) {
+      let ticketArray = [];
+      if (response.status === 200) {
+        for (let i = 0; i < response.data.tickets.length; i++) {
+          for (let j = 0; j < response.data.users.length; j++) {
+            if (response.data.tickets[i].userId === response.data.users[j].id) {
+              let ticketJson = {
+                ...response.data.tickets[i],
+                userObj: response.data.users[j],
+              };
+              ticketArray.push(ticketJson);
             }
           }
         }
-      await setticketDetails(ticketArray)
-      orderDataByValue(ticketArray)
+      }
+      await setticketDetails(ticketArray);
+      orderDataByValue(ticketArray);
     }
-    
-  }, [orderDataByValue, groupValue,orderValue])
+  }, [orderDataByValue, groupValue, orderValue]);
 
   function handleGroupValue(value) {
     setgroupValue(value);
