@@ -22,10 +22,11 @@ function App() {
   ];
 
   const [groupValue, setgroupValue] = useState(
-    getStateFromLocalStorage("status") || "status"
+    getStateFromLocalStorage("group") || "status"
   );
   const [orderValue, setorderValue] = useState(
-    getStateFromLocalStorage("order") || "title");
+    getStateFromLocalStorage("order") || "title"
+  );
   const [ticketDetails, setticketDetails] = useState([]);
 
   const orderDataByValue = useCallback(
@@ -46,23 +47,22 @@ function App() {
           }
         });
       }
-      setticketDetails(cardsArry);
+      await setticketDetails(cardsArry);
     },
     [orderValue, setticketDetails]
   );
 
   function saveStateToLocalStorage(state) {
     localStorage.setItem("groupValue", JSON.stringify(state.groupValue));
-    localStorage.setItem("orderValue",JSON.stringify(state.orderValue));
+    localStorage.setItem("orderValue", JSON.stringify(state.orderValue));
   }
 
   function getStateFromLocalStorage(val) {
     const storedState = localStorage.getItem("groupValue");
     const storedOrder = localStorage.getItem("orderValue");
-    if (val==="status") {
+    if (val === "group") {
       return JSON.parse(storedState);
-    }
-    else if(val==="order"){
+    } else if (val === "order") {
       return JSON.parse(storedOrder);
     }
     return null;
@@ -70,39 +70,29 @@ function App() {
 
   useEffect(() => {
     saveStateToLocalStorage({groupValue,orderValue});
-
     async function fetchData() {
-      try {
-        const response = await axios.get(
-          "https://api.quicksell.co/v1/internal/frontend-assignment"
-        );
-        if (response.status === 200) {
-          refactorData(response);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+      const response = await axios.get('https://api.quicksell.co/v1/internal/frontend-assignment');
+      await refactorData(response);
+  
     }
-
-    async function refactorData(response) {
-      const usersById = response.data.users.reduce((acc, user) => {
-        acc[user.id] = user;
-        return acc;
-      }, {});
-
-      const ticketArray = response.data.tickets.map((ticket) => {
-        return {
-          ...ticket,
-          userObj: usersById[ticket.userId] || {},
-        };
-      });
-
-      setticketDetails(ticketArray);
-      orderDataByValue(ticketArray);
-    }
-
     fetchData();
-  }, [orderDataByValue, groupValue, orderValue]);
+    async function refactorData(response){
+      let ticketArray = []
+        if(response.status  === 200){
+          for(let i=0; i<response.data.tickets.length; i++){
+            for(let j=0; j<response.data.users.length; j++){
+              if(response.data.tickets[i].userId === response.data.users[j].id){
+                let ticketJson = {...response.data.tickets[i], userObj: response.data.users[j]}
+                ticketArray.push(ticketJson)
+              }
+            }
+          }
+        }
+      await setticketDetails(ticketArray)
+      orderDataByValue(ticketArray)
+    }
+    
+  }, [orderDataByValue, groupValue,orderValue])
 
   function handleGroupValue(value) {
     setgroupValue(value);
