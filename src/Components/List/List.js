@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./List.css";
 import Card from "../Card/Card";
 import Backlog from "../../Assets/Images/Backlog.svg";
@@ -14,14 +14,14 @@ import Low from "../../Assets/Images/Img - Low Priority.svg";
 import NoPriority from "../../Assets/Images/No-priority.svg";
 import threeDotMenu from "../../Assets/Images/3 dot menu.svg";
 
-let countCards = 0;
-
 export default function List({
   groupValue,
   listTitle,
   priorityList,
   ticketDetails,
 }) {
+  const [countCards, setCountCards] = useState(0);
+
   const renderListIcon = () => {
     switch (listTitle) {
       case "Backlog":
@@ -66,6 +66,32 @@ export default function List({
     return listTitle;
   };
 
+  useEffect(() => {
+    // Calculate the number of cards each time ticketDetails or listTitle changes
+    let cardCount = 0;
+    ticketDetails.forEach((ticket) => {
+      let shouldRenderCard = false;
+      switch (groupValue) {
+        case "status":
+          shouldRenderCard = ticket.status === listTitle;
+          break;
+        case "priority":
+          shouldRenderCard = ticket.priority === listTitle;
+          break;
+        case "user":
+          shouldRenderCard = ticket.userObj.name === listTitle;
+          break;
+        default:
+          break;
+      }
+
+      if (shouldRenderCard) {
+        cardCount++;
+      }
+    });
+    setCountCards(cardCount);
+  }, [groupValue, listTitle, ticketDetails]);
+
   return (
     <>
       <div className="list-container">
@@ -108,11 +134,10 @@ export default function List({
             }
 
             if (shouldRenderCard) {
-              countCards++;
               return <Card key={ticket.id} cardDetails={ticket} />;
             }
             return null;
-          }, (countCards = 0))}
+          })}
         </div>
       </div>
     </>
