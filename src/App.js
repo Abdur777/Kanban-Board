@@ -47,7 +47,7 @@ function App() {
           }
         });
       }
-      await setticketDetails(cardsArry);
+      setticketDetails(cardsArry);
     },
     [orderValue, setticketDetails]
   );
@@ -92,7 +92,7 @@ function App() {
           }
         }
       }
-      await setticketDetails(ticketArray);
+      setticketDetails(ticketArray);
       orderDataByValue(ticketArray);
     }
   }, [orderDataByValue, groupValue, orderValue]);
